@@ -1,4 +1,4 @@
-.PHONY: up down remove lint
+.PHONY: up down remove lint seed
 
 up:
 	@test -f .env || { echo "Скопируйте .env.example в .env"; exit 1; }
@@ -16,3 +16,6 @@ remove:
 
 lint:
 	docker compose exec -w /var/www/html php vendor/bin/php-cs-fixer fix
+
+seed:
+	docker compose exec -w /var/www/html php php bin/seed.php
