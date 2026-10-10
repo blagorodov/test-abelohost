@@ -21,7 +21,8 @@ make up
 ```bash
 docker compose up -d
 docker compose exec -w /var/www/html -e COMPOSER_ALLOW_SUPERUSER=1 php composer install
-sass --no-source-map scss/main.scss public/css/main.css
+docker build -t abelohost-sass docker/sass
+docker run --rm -u "$(id -u):$(id -g)" -v "$(pwd):/work" -w /work abelohost-sass --no-source-map scss/main.scss public/css/main.css
 ```
 
 Страница: http://localhost:8080

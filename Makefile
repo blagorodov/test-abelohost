@@ -5,7 +5,8 @@ up:
 	docker compose up -d --wait
 	sh bin/init-db.sh
 	docker compose exec -w /var/www/html -e COMPOSER_ALLOW_SUPERUSER=1 php composer install
-	sass --no-source-map scss/main.scss public/css/main.css
+	docker build -t abelohost-sass docker/sass
+	docker run --rm -u "$(id -u):$(id -g)" -v "$(CURDIR):/work" -w /work abelohost-sass --no-source-map scss/main.scss public/css/main.css
 
 down:
 	docker compose down
