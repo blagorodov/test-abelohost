@@ -1,3 +1,27 @@
+# Установка
+
+## Если установлен make
+
+```bash
+make up
+```
+
+Страница: http://localhost:8080
+
+Остановка: `make down`
+
+## Без утилиты make
+
+```bash
+docker compose up -d
+docker compose exec -w /var/www/html -e COMPOSER_ALLOW_SUPERUSER=1 php composer install
+sass --no-source-map scss/main.scss public/css/main.css
+```
+
+Страница: http://localhost:8080
+
+Остановка: `docker compose down`
+
 # Тестовое задание AbeloHost
 
 Необходимо разработать простой, но полностью рабочий веб-сайт на чистом PHP (без фреймворков) с использованием MySQL и шаблонизатора Smarty. Сайт должен реализовывать функционал блога с категориями и постами.

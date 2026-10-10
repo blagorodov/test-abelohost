@@ -1,11 +1,11 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="utf-8">
-    <title>Блог</title>
-    <link rel="stylesheet" href="/css/main.css">
-</head>
-<body>
-    Блог
-</body>
-</html>
+<?php
+
+use Smarty\Smarty;
+
+require dirname(__DIR__) . '/vendor/autoload.php';
+
+$smarty = new Smarty();
+$smarty->setTemplateDir(dirname(__DIR__) . '/templates');
+$smarty->setCompileDir(dirname(__DIR__) . '/templates_c');
+$smarty->setCacheDir(dirname(__DIR__) . '/cache');
+$smarty->display('index.tpl');
