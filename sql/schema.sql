@@ -1,0 +1,21 @@
+CREATE TABLE IF NOT EXISTS categories (
+    id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    description TEXT NOT NULL
+) CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS posts (
+    id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    image VARCHAR(255) NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    description TEXT NOT NULL,
+    body TEXT NOT NULL,
+    views INT UNSIGNED NOT NULL DEFAULT 0,
+    published_at DATETIME NOT NULL
+) CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS post_category (
+    post_id INT UNSIGNED NOT NULL,
+    category_id INT UNSIGNED NOT NULL,
+    PRIMARY KEY (post_id, category_id)
+) CHARSET=utf8mb4;

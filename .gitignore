@@ -3,3 +3,4 @@
 /templates_c/
 /cache/
 /.php-cs-fixer.cache
+/.env
