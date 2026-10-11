@@ -1,8 +1,7 @@
 <?php
 
 $root = dirname(__DIR__);
-$config = require $root . '/config.php';
-require_once $root . '/src/Db.php';
+require_once $root . '/src/bootstrap.php';
 
 $categories = readJson($root . '/data/categories.json');
 $posts = readJson($root . '/data/posts.json');
@@ -15,7 +14,7 @@ foreach ($posts as $post) {
     }
 }
 
-$pdo = new Db($config)->pdo();
+$pdo = db();
 $pdo->exec('DELETE FROM post_category');
 $pdo->exec('DELETE FROM posts');
 $pdo->exec('DELETE FROM categories');
