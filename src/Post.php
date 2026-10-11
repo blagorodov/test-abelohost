@@ -55,4 +55,51 @@ readonly class Post
 
         return array_values($categories);
     }
+
+    public function countByCategory(int $categoryId): int
+    {
+        $statement = $this->pdo->prepare(
+            'SELECT COUNT(*) FROM post_category WHERE category_id = ?',
+        );
+        $statement->execute([$categoryId]);
+
+        return (int) $statement->fetchColumn();
+    }
+
+    /** @throws DateMalformedStringException */
+    public function pageByCategory(int $categoryId, string $sort, int $page): array
+    {
+        $orderBy = $sort === 'views'
+            ? 'p.views DESC, p.id DESC'
+            : 'p.published_at DESC, p.id DESC';
+        $offset = ($page - 1) * 6;
+
+        $sql = <<<SQL
+            SELECT p.id, p.image, p.title, p.description, p.views, p.published_at
+            FROM posts p
+            INNER JOIN post_category pc ON pc.post_id = p.id
+            WHERE pc.category_id = ?
+            ORDER BY {$orderBy}
+            LIMIT 6 OFFSET {$offset}
+            SQL;
+
+        $statement = $this->pdo->prepare($sql);
+        $statement->execute([$categoryId]);
+
+        $posts = [];
+        foreach ($statement->fetchAll(PDO::FETCH_ASSOC) as $row) {
+            $publishedAt = new DateTimeImmutable($row['published_at']);
+            $posts[] = [
+                'id' => (int) $row['id'],
+                'image' => $row['image'],
+                'title' => $row['title'],
+                'description' => $row['description'],
+                'views' => (int) $row['views'],
+                'published_at' => $publishedAt->format('d.m.Y'),
+                'published_at_iso' => $publishedAt->format('Y-m-d'),
+            ];
+        }
+
+        return $posts;
+    }
 }
