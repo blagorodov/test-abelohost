@@ -13,7 +13,7 @@
     <ul class="category-page__list">
     {foreach $posts as $post}
         <li class="category-page__item">
-            <img src="{$post.image|escape}" alt="{$post.title|escape}" width="120" height="90">
+            <a href="/post/{$post.id}"><img src="{$post.image|escape}" alt="{$post.title|escape}" width="120" height="90"></a>
             <div>
                 <h2>{$post.title|escape}</h2>
                 <time datetime="{$post.published_at_iso|escape}">{$post.published_at|escape}</time>

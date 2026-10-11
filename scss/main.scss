@@ -113,9 +113,12 @@ header {
         padding-bottom: 1.25rem;
         border-bottom: 1px solid #d9d2c5;
 
+        > a {
+            flex: 0 0 120px;
+        }
+
         img {
             display: block;
-            flex: 0 0 120px;
             width: 120px;
             height: 90px;
             object-fit: cover;
@@ -165,5 +168,108 @@ header {
     &__page-inactive {
         color: #9a948a;
         text-decoration: none;
+    }
+}
+
+.post-page {
+    padding: 1.5rem 1.25rem;
+
+    &__home {
+        margin: 0 0 1rem;
+
+        a {
+            color: #1a1a1a;
+            text-decoration: underline;
+        }
+    }
+
+    &__image {
+        display: block;
+        width: 100%;
+        max-width: 48rem;
+        height: auto;
+        aspect-ratio: 4 / 3;
+        object-fit: cover;
+        margin-bottom: 1rem;
+        background: #e5dfd3;
+    }
+
+    h1 {
+        margin: 0 0 0.5rem;
+        font-size: 1.75rem;
+    }
+
+    time {
+        display: block;
+        margin-bottom: 0.25rem;
+        font-size: 0.85rem;
+        color: #5c564c;
+    }
+
+    &__views {
+        margin: 0 0 0.75rem;
+        color: #5c564c;
+        font-size: 0.85rem;
+    }
+
+    &__description {
+        margin: 0 0 0.75rem;
+    }
+
+    &__categories {
+        margin: 0 0 1.25rem;
+
+        a {
+            color: #1a1a1a;
+            text-decoration: underline;
+        }
+    }
+
+    &__body {
+        p {
+            margin: 0 0 1rem;
+        }
+    }
+
+    &__related {
+        margin-top: 2rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid #d9d2c5;
+
+        h2 {
+            margin: 0 0 1rem;
+            font-size: 1.25rem;
+        }
+
+        ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        li {
+            display: flex;
+            gap: 1rem;
+            margin: 0 0 1rem;
+
+            img {
+                display: block;
+                flex: 0 0 120px;
+                width: 120px;
+                height: 90px;
+                object-fit: cover;
+                background: #e5dfd3;
+            }
+
+            a {
+                display: block;
+                margin-bottom: 0.25rem;
+                color: #1a1a1a;
+            }
+
+            time {
+                margin: 0;
+            }
+        }
     }
 }

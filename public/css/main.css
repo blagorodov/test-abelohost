@@ -99,9 +99,11 @@ header {
   padding-bottom: 1.25rem;
   border-bottom: 1px solid #d9d2c5;
 }
+.category-page__item > a {
+  flex: 0 0 120px;
+}
 .category-page__item img {
   display: block;
-  flex: 0 0 120px;
   width: 120px;
   height: 90px;
   object-fit: cover;
@@ -142,4 +144,88 @@ header {
 .category-page__page-inactive {
   color: #9a948a;
   text-decoration: none;
+}
+
+.post-page {
+  padding: 1.5rem 1.25rem;
+}
+.post-page__home {
+  margin: 0 0 1rem;
+}
+.post-page__home a {
+  color: #1a1a1a;
+  text-decoration: underline;
+}
+.post-page__image {
+  display: block;
+  width: 100%;
+  max-width: 48rem;
+  height: auto;
+  aspect-ratio: 4/3;
+  object-fit: cover;
+  margin-bottom: 1rem;
+  background: #e5dfd3;
+}
+.post-page h1 {
+  margin: 0 0 0.5rem;
+  font-size: 1.75rem;
+}
+.post-page time {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-size: 0.85rem;
+  color: #5c564c;
+}
+.post-page__views {
+  margin: 0 0 0.75rem;
+  color: #5c564c;
+  font-size: 0.85rem;
+}
+.post-page__description {
+  margin: 0 0 0.75rem;
+}
+.post-page__categories {
+  margin: 0 0 1.25rem;
+}
+.post-page__categories a {
+  color: #1a1a1a;
+  text-decoration: underline;
+}
+.post-page__body p {
+  margin: 0 0 1rem;
+}
+.post-page__related {
+  margin-top: 2rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid #d9d2c5;
+}
+.post-page__related h2 {
+  margin: 0 0 1rem;
+  font-size: 1.25rem;
+}
+.post-page__related ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.post-page__related li {
+  display: flex;
+  gap: 1rem;
+  margin: 0 0 1rem;
+}
+.post-page__related li img {
+  display: block;
+  flex: 0 0 120px;
+  width: 120px;
+  height: 90px;
+  object-fit: cover;
+  background: #e5dfd3;
+}
+.post-page__related li a {
+  display: block;
+  margin-bottom: 0.25rem;
+  color: #1a1a1a;
+}
+.post-page__related li time {
+  margin: 0;
 }

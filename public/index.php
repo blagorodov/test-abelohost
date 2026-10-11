@@ -42,6 +42,29 @@ try {
         return;
     }
 
+    if (preg_match('#^/post/([1-9][0-9]*)$#', $path, $matches) === 1) {
+        $posts = new Post(db());
+        $post = $posts->open((int) $matches[1]);
+        if ($post === null) {
+            render('404.tpl', 404);
+            return;
+        }
+
+        $paragraphs = array_values(array_filter(
+            array_map('trim', preg_split("/\n\s*\n/", $post['body']) ?: []),
+            static fn (string $paragraph): bool => $paragraph !== '',
+        ));
+        unset($post['body']);
+
+        render('post.tpl', 200, [
+            'page_title' => $post['title'],
+            'post' => $post,
+            'paragraphs' => $paragraphs,
+            'related' => $posts->similar($post['id']),
+        ]);
+        return;
+    }
+
     render('404.tpl', 404);
 } catch (PDOException) {
     render('500.tpl', 500, ['error' => 'База недоступна']);
