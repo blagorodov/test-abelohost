@@ -17,5 +17,7 @@ CREATE TABLE IF NOT EXISTS posts (
 CREATE TABLE IF NOT EXISTS post_category (
     post_id INT UNSIGNED NOT NULL,
     category_id INT UNSIGNED NOT NULL,
-    PRIMARY KEY (post_id, category_id)
+    PRIMARY KEY (post_id, category_id),
+    FOREIGN KEY (post_id) REFERENCES posts (id) ON DELETE CASCADE,
+    FOREIGN KEY (category_id) REFERENCES categories (id) ON DELETE CASCADE
 ) CHARSET=utf8mb4;

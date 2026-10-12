@@ -1,10 +1,9 @@
 {extends file="layout.tpl"}
 {block name="content"}
 <section class="post-page">
-    <p class="post-page__home"><a href="/">На главную</a></p>
     <img class="post-page__image" src="{$post.image|escape}" alt="{$post.title|escape}" width="800" height="600">
     <h1>{$post.title|escape}</h1>
-    <time datetime="{$post.published_at_iso|escape}">{$post.published_at|escape}</time>
+    <time datetime="{$post.published_at|date_format:'Y-m-d'}">{$post.published_at|date_format:'d.m.Y'}</time>
     <p class="post-page__views">{$post.views} просмотров</p>
     <p class="post-page__description">{$post.description|escape}</p>
     <p class="post-page__categories">
@@ -18,7 +17,7 @@
     {/foreach}
     </div>
 
-    {if $related|@count > 0}
+    {if $related}
     <section class="post-page__related">
         <h2>Похожие статьи</h2>
         <ul>
@@ -27,7 +26,7 @@
                 <img src="{$item.image|escape}" alt="{$item.title|escape}" width="120" height="90">
                 <div>
                     <a href="/post/{$item.id}">{$item.title|escape}</a>
-                    <time datetime="{$item.published_at_iso|escape}">{$item.published_at|escape}</time>
+                    <time datetime="{$item.published_at|date_format:'Y-m-d'}">{$item.published_at|date_format:'d.m.Y'}</time>
                 </div>
             </li>
         {/foreach}

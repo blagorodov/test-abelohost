@@ -10,28 +10,22 @@ cp .env.example .env
 
 ```bash
 make up
+make seed
 ```
 
 Страница: http://localhost:8080
 
-Категории и статьи загружаются отдельно, когда контейнеры уже запущены:
-
-```bash
-make seed
-```
-
 Повторный `make seed` очищает таблицы и заполняет их заново.
 
-Остановка: `make down`
+Стили уже собраны в `public/css/main.css`. Пересобрать: `make css`.
+
+Остановка: `make down`. Вместе с данными MySQL: `make remove`.
 
 ## Без утилиты make
 
 ```bash
-docker compose up -d
-sh bin/init-db.sh
+docker compose up -d --wait
 docker compose exec -w /var/www/html -e COMPOSER_ALLOW_SUPERUSER=1 php composer install
-docker build -t abelohost-sass docker/sass
-docker run --rm -u "$(id -u):$(id -g)" -v "$(pwd):/work" -w /work abelohost-sass --no-source-map scss/main.scss public/css/main.css
 docker compose exec -w /var/www/html php php bin/seed.php
 ```
 
@@ -40,6 +34,22 @@ docker compose exec -w /var/www/html php php bin/seed.php
 Повторный запуск последней команды очищает таблицы и заполняет их заново.
 
 Остановка: `docker compose down`
+
+# Решение
+
+Один вход `public/index.php`: путь, запрос к `Category` или `Post`, шаблон Smarty. Подключение к MySQL — функция `db()` в `src/bootstrap.php`. Файл `.env` читается через `parse_ini_file`.
+
+На главной один запрос с `ROW_NUMBER()`: не больше трёх последних статей на категорию. Категории без статей в выборку не попадают.
+
+Похожие статьи — другие статьи с общими категориями, без повторов, не больше трёх. Выше та, у которой общих категорий больше. При равенстве новее дата публикации.
+
+Просмотр — отдельный `UPDATE` до чтения статьи, поэтому на странице уже увеличенное число.
+
+# Использование ИИ
+
+Сидер: тексты статей и картинки сгенерированы ИИ.
+
+Остальной код: написан вручную.
 
 # Тестовое задание AbeloHost
 

@@ -2,60 +2,10 @@
 
 readonly class Post
 {
+    public const PER_PAGE = 6;
+
     public function __construct(private PDO $pdo)
     {
-    }
-
-    /**
-     * @throws DateMalformedStringException
-     */
-    public function latestByCategory(): array
-    {
-        $sql = <<<'SQL'
-            SELECT category_id, category_name, id, title, description, image, published_at
-            FROM (
-                SELECT
-                    c.id AS category_id,
-                    c.name AS category_name,
-                    p.id,
-                    p.title,
-                    p.description,
-                    p.image,
-                    p.published_at,
-                    ROW_NUMBER() OVER (
-                        PARTITION BY c.id
-                        ORDER BY p.published_at DESC, p.id DESC
-                    ) AS rn
-                FROM categories c
-                INNER JOIN post_category pc ON pc.category_id = c.id
-                INNER JOIN posts p ON p.id = pc.post_id
-            ) ranked
-            WHERE rn <= 3
-            ORDER BY category_id ASC, rn ASC
-            SQL;
-
-        $categories = [];
-        foreach ($this->pdo->query($sql)->fetchAll(PDO::FETCH_ASSOC) as $row) {
-            $id = (int) $row['category_id'];
-            if (!isset($categories[$id])) {
-                $categories[$id] = [
-                    'id' => $id,
-                    'name' => $row['category_name'],
-                    'posts' => [],
-                ];
-            }
-            $publishedAt = new DateTimeImmutable($row['published_at']);
-            $categories[$id]['posts'][] = [
-                'id' => (int) $row['id'],
-                'title' => $row['title'],
-                'description' => $row['description'],
-                'image' => $row['image'],
-                'published_at' => $publishedAt->format('d.m.Y'),
-                'published_at_iso' => $publishedAt->format('Y-m-d'),
-            ];
-        }
-
-        return array_values($categories);
     }
 
     public function countByCategory(int $categoryId): int
@@ -68,13 +18,12 @@ readonly class Post
         return (int) $statement->fetchColumn();
     }
 
-    /** @throws DateMalformedStringException */
     public function pageByCategory(int $categoryId, string $sort, int $page): array
     {
         $orderBy = $sort === 'views'
             ? 'p.views DESC, p.id DESC'
             : 'p.published_at DESC, p.id DESC';
-        $offset = ($page - 1) * 6;
+        $offset = ($page - 1) * self::PER_PAGE;
 
         $sql = <<<SQL
             SELECT p.id, p.image, p.title, p.description, p.views, p.published_at
@@ -82,44 +31,38 @@ readonly class Post
             INNER JOIN post_category pc ON pc.post_id = p.id
             WHERE pc.category_id = ?
             ORDER BY {$orderBy}
-            LIMIT 6 OFFSET {$offset}
+            LIMIT ? OFFSET ?
             SQL;
 
         $statement = $this->pdo->prepare($sql);
-        $statement->execute([$categoryId]);
+        $statement->bindValue(1, $categoryId, PDO::PARAM_INT);
+        $statement->bindValue(2, self::PER_PAGE, PDO::PARAM_INT);
+        $statement->bindValue(3, $offset, PDO::PARAM_INT);
+        $statement->execute();
 
-        $posts = [];
-        foreach ($statement->fetchAll(PDO::FETCH_ASSOC) as $row) {
-            $publishedAt = new DateTimeImmutable($row['published_at']);
-            $posts[] = [
-                'id' => (int) $row['id'],
-                'image' => $row['image'],
-                'title' => $row['title'],
-                'description' => $row['description'],
-                'views' => (int) $row['views'],
-                'published_at' => $publishedAt->format('d.m.Y'),
-                'published_at_iso' => $publishedAt->format('Y-m-d'),
-            ];
-        }
-
-        return $posts;
+        return $statement->fetchAll();
     }
 
-    /** @throws DateMalformedStringException */
-    public function open(int $id): ?array
+    public function incrementViews(int $id): bool
+    {
+        $statement = $this->pdo->prepare('UPDATE posts SET views = views + 1 WHERE id = ?');
+        $statement->execute([$id]);
+
+        return $statement->rowCount() === 1;
+    }
+
+    public function find(int $id): ?array
     {
         $statement = $this->pdo->prepare(
             'SELECT id, image, title, description, body, views, published_at FROM posts WHERE id = ?',
         );
         $statement->execute([$id]);
-        $row = $statement->fetch(PDO::FETCH_ASSOC);
-        if ($row === false) {
+        $post = $statement->fetch();
+        if ($post === false) {
             return null;
         }
 
-        $this->pdo->prepare('UPDATE posts SET views = views + 1 WHERE id = ?')->execute([$id]);
-
-        $categoriesStatement = $this->pdo->prepare(
+        $categories = $this->pdo->prepare(
             <<<'SQL'
                 SELECT c.id, c.name
                 FROM categories c
@@ -128,61 +71,28 @@ readonly class Post
                 ORDER BY c.id ASC
                 SQL
         );
-        $categoriesStatement->execute([$id]);
+        $categories->execute([$id]);
+        $post['categories'] = $categories->fetchAll();
 
-        $categories = [];
-        foreach ($categoriesStatement->fetchAll(PDO::FETCH_ASSOC) as $category) {
-            $categories[] = [
-                'id' => (int) $category['id'],
-                'name' => $category['name'],
-            ];
-        }
-
-        $publishedAt = new DateTimeImmutable($row['published_at']);
-
-        return [
-            'id' => (int) $row['id'],
-            'image' => $row['image'],
-            'title' => $row['title'],
-            'description' => $row['description'],
-            'body' => $row['body'],
-            'views' => (int) $row['views'] + 1,
-            'published_at' => $publishedAt->format('d.m.Y'),
-            'published_at_iso' => $publishedAt->format('Y-m-d'),
-            'categories' => $categories,
-        ];
+        return $post;
     }
 
-    /** @throws DateMalformedStringException */
     public function similar(int $id): array
     {
         $sql = <<<'SQL'
-            SELECT DISTINCT p.id, p.image, p.title, p.published_at
-            FROM posts p
-            INNER JOIN post_category pc ON pc.post_id = p.id
-            WHERE pc.category_id IN (
-                SELECT category_id FROM post_category WHERE post_id = ?
-            )
-            AND p.id <> ?
-            ORDER BY p.published_at DESC, p.id DESC
+            SELECT p.id, p.image, p.title, p.published_at
+            FROM post_category own
+            INNER JOIN post_category pc ON pc.category_id = own.category_id AND pc.post_id <> own.post_id
+            INNER JOIN posts p ON p.id = pc.post_id
+            WHERE own.post_id = ?
+            GROUP BY p.id
+            ORDER BY COUNT(*) DESC, p.published_at DESC, p.id DESC
             LIMIT 3
             SQL;
 
         $statement = $this->pdo->prepare($sql);
-        $statement->execute([$id, $id]);
+        $statement->execute([$id]);
 
-        $posts = [];
-        foreach ($statement->fetchAll(PDO::FETCH_ASSOC) as $row) {
-            $publishedAt = new DateTimeImmutable($row['published_at']);
-            $posts[] = [
-                'id' => (int) $row['id'],
-                'image' => $row['image'],
-                'title' => $row['title'],
-                'published_at' => $publishedAt->format('d.m.Y'),
-                'published_at_iso' => $publishedAt->format('Y-m-d'),
-            ];
-        }
-
-        return $posts;
+        return $statement->fetchAll();
     }
 }

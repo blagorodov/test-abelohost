@@ -14,16 +14,8 @@ foreach ($posts as $post) {
     }
 }
 
-$pdo = db();
-$pdo->exec('DELETE FROM post_category');
-$pdo->exec('DELETE FROM posts');
-$pdo->exec('DELETE FROM categories');
-
 $destDir = $root . '/public/images';
-if (!is_dir($destDir) && !mkdir($destDir, 0775, true) && !is_dir($destDir)) {
-    fwrite(STDERR, "Не удалось создать {$destDir}\n");
-    exit(1);
-}
+is_dir($destDir) || mkdir($destDir, 0775, true);
 
 foreach ($posts as $post) {
     $name = basename($post['image']);
@@ -32,6 +24,11 @@ foreach ($posts as $post) {
         exit(1);
     }
 }
+
+$pdo = db();
+$pdo->beginTransaction();
+$pdo->exec('DELETE FROM posts');
+$pdo->exec('DELETE FROM categories');
 
 $now = time();
 $from = strtotime('-1 month', $now);
@@ -62,9 +59,11 @@ foreach ($posts as $post) {
     }
 }
 
+$pdo->commit();
+
 function readJson(string $path): array
 {
-    $data = json_decode((string) file_get_contents($path), true);
+    $data = json_decode((string) file_get_contents($path), true, flags: JSON_THROW_ON_ERROR);
     if (!is_array($data)) {
         fwrite(STDERR, "Не читается {$path}\n");
         exit(1);
