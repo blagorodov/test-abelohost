@@ -10,11 +10,13 @@ if ($path === null || $path === '') {
 }
 
 try {
+    // Главная
     if ($path === '/' || $path === '/index.php') {
         render('home.tpl', 200, ['categories' => new Post(db())->latestByCategory()]);
         return;
     }
 
+    // Страница категории
     if (preg_match('#^/category/([1-9][0-9]*)$#', $path, $matches) === 1) {
         $category = new Category(db())->find((int) $matches[1]);
         if ($category === null) {
@@ -42,6 +44,7 @@ try {
         return;
     }
 
+    // Страница поста
     if (preg_match('#^/post/([1-9][0-9]*)$#', $path, $matches) === 1) {
         $posts = new Post(db());
         $post = $posts->open((int) $matches[1]);
